@@ -21,15 +21,17 @@ const Index = () => {
       <Header />
       
       <main className="flex-grow">
-        <section className="bg-white text-black py-16 px-4">
+        <section className="bg-white text-black py-8 px-4">
           <div className="container mx-auto text-center max-w-4xl">
-            <Link to="/" className="flex items-center justify-start mb-8">
-              <img 
-                src="/lovable-uploads/5b99b574-e6c1-4c0f-821e-8a7044b2800b.png" 
-                alt="The Middle Man Logo" 
-                className="h-24 w-auto object-contain"
-              />
-            </Link>
+            <div className="flex justify-center mb-4">
+              <Link to="/" className="block">
+                <img 
+                  src="/lovable-uploads/5b99b574-e6c1-4c0f-821e-8a7044b2800b.png" 
+                  alt="The Middle Man Logo" 
+                  className="h-24 w-auto object-contain mx-auto"
+                />
+              </Link>
+            </div>
             <h1 className="text-3xl md:text-5xl font-bold mb-6 text-black">
               The Middle Man ZA ATS Checker
             </h1>
@@ -39,9 +41,9 @@ const Index = () => {
           </div>
         </section>
         
-        <section className="py-12 px-4 bg-white">
+        <section className="py-8 px-4 bg-white">
           <div className="container mx-auto max-w-3xl">
-            <div className="text-center mb-12">
+            <div className="text-center">
               <h2 className="text-2xl md:text-3xl font-bold mb-4 text-black">
                 What is ATS?
               </h2>
@@ -78,7 +80,7 @@ const Index = () => {
           </div>
         </section>
         
-        <section className="py-12 px-4 bg-white">
+        <section className="py-8 px-4 bg-white">
           <div className="container mx-auto">
             <div className="text-center mb-10">
               <h2 className="text-2xl md:text-3xl font-bold mb-4 text-black">
@@ -100,4 +102,3 @@ const Index = () => {
 };
 
 export default Index;
-
