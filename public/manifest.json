@@ -1,0 +1,24 @@
+
+{
+  "name": "The Middle Man ATS Checker",
+  "short_name": "ATS Checker",
+  "description": "Advanced ATS Resume Checker - Improve your resume's compatibility with Applicant Tracking Systems",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/public/lovable-uploads/5b99b574-e6c1-4c0f-821e-8a7044b2800b.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/public/lovable-uploads/5b99b574-e6c1-4c0f-821e-8a7044b2800b.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
