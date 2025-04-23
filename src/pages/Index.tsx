@@ -1,10 +1,8 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import UploadForm from '@/components/UploadForm';
-import BenefitCard from '@/components/BenefitCard';
 import { Search, FileText, ChartBar } from 'lucide-react';
 
 const Index = () => {
@@ -32,9 +30,9 @@ const Index = () => {
             </p>
             <div className="flex justify-center">
               <img 
-                src="/public/lovable-uploads/5b99b574-e6c1-4c0f-821e-8a7044b2800b.png" 
+                src="/lovable-uploads/5b99b574-e6c1-4c0f-821e-8a7044b2800b.png" 
                 alt="The Middle Man Logo" 
-                className="h-24 w-auto" 
+                className="h-24 w-auto object-contain"
               />
             </div>
           </div>
