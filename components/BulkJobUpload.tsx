@@ -16,7 +16,7 @@ interface FileStatus {
 
 // IMPORTANT: Replace <YOUR_PROJECT_REF> with your actual Supabase project reference
 // You can find this in your Supabase project settings under API -> Project URL
-const SUPABASE_EDGE_FUNCTION_URL = "https://<YOUR_PROJECT_REF>.functions.supabase.co/bulk-job-upload";
+const SUPABASE_EDGE_FUNCTION_URL = "https://YOUR_ACTUAL_PROJECT_REF.functions.supabase.co/bulk-job-upload"; // <--- UPDATE THIS LINE
 
 const BulkJobUpload: React.FC<{ onUploadComplete: () => void }> = ({ onUploadComplete }) => {
     const [files, setFiles] = useState<FileStatus[]>([]);
@@ -79,7 +79,7 @@ const BulkJobUpload: React.FC<{ onUploadComplete: () => void }> = ({ onUploadCom
             });
         } else if (file.type.startsWith('image/') || file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.type === 'text/plain') {
             // For images, PDFs, DOCX, TXT, use Tesseract.js for OCR/text extraction
-            const { data: { text } } = await Tesseract.recognize(file, 'eng');
+            const { data: { text } = { text: '' } } = await Tesseract.recognize(file, 'eng'); // Added default for data
             return [text]; // Return as an array for the Edge Function
         } else {
             throw new Error(`Unsupported file type: ${file.type}. Please upload CSV, image, PDF, DOCX, or TXT files.`);

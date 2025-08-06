@@ -3,6 +3,11 @@
     "https://deno.land/std@0.177.0/": "https://deno.land/std@0.177.0/",
     "npm:@google/genai": "npm:@google/genai@^1.11.0"
   },
+  "compilerOptions": {
+    "lib": ["deno.ns", "deno.window"],
+    "strict": true,
+    "types": ["deno.ns", "npm:@google/genai"]
+  },
   "tasks": {
     "start": "deno run --allow-net --allow-env --allow-read --allow-write --watch index.ts"
   }
