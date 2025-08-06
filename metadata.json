@@ -1,0 +1,8 @@
+{
+  "name": "The Middle Man ZA",
+  "description": "An AI-powered platform for job seekers to upload or create CVs, analyze them against job descriptions, and receive actionable feedback to optimize their applications for the South African job market.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "prompt": ""
+}
