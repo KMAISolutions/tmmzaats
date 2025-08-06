@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import Card from './Card';
-import { LanguagesIcon, SparklesIcon, AlertCircleIcon, DocumentDuplicateIcon, UploadCloudIcon } from './icons';
+import { SparklesIcon, AlertCircleIcon, DocumentDuplicateIcon, UploadCloudIcon } from './icons';
 import Spinner from './Spinner';
 import { extractTextFromFile } from '../services/geminiService';
 
@@ -103,7 +103,7 @@ const MultilingualCv: React.FC = () => {
                 model: 'gemini-2.5-flash',
                 contents: prompt,
             });
-            setTranslatedText(response.text);
+            setTranslatedText(response.text ?? '');
 
         } catch(e: any) {
             setError(e.message || "An unknown error occurred during translation.");

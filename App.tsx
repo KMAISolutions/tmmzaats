@@ -10,7 +10,6 @@ import ApplicationTracker from './components/ApplicationTracker';
 import MultilingualCv from './components/MultilingualCv';
 import Networking from './components/Networking';
 import Settings from './components/Settings';
-import JobMatch from './components/JobMatch';
 import AdminDashboard from './components/AdminDashboard';
 import ComingSoon from './components/ComingSoon'; // Import the new ComingSoon component
 import { MenuIcon, LogoIcon, ShieldCheckIcon, FacebookIcon, WhatsappIcon } from './components/icons';
@@ -22,13 +21,9 @@ const App: React.FC = () => {
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
 
   useEffect(() => {
-    // Set theme on initial load
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
+    // Always apply dark mode
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('theme', 'dark'); // Ensure localStorage reflects dark mode
 
     const handleResize = () => {
       if (window.innerWidth >= 1024) { // lg breakpoint in tailwind

@@ -1,6 +1,5 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
-import { AnalysisResult, CvData, Job, StructuredJob } from '../types';
+import { AnalysisResult, StructuredJob } from '../types';
 
 if (!process.env.API_KEY) {
     throw new Error("API_KEY environment variable is not set");
@@ -68,7 +67,7 @@ export const analyzeCvWithJobDescription = async (cvFile: { mimeType: string; da
             },
         });
 
-        const jsonText = response.text.trim();
+        const jsonText = response.text?.trim() ?? '';
         const result: AnalysisResult = JSON.parse(jsonText);
         return result;
 
@@ -102,7 +101,7 @@ export const extractTextFromFile = async (file: { mimeType: string; data: string
             }
         });
 
-        return response.text.trim();
+        return response.text?.trim() ?? '';
 
     } catch (error) {
         console.error("Error extracting text from file with Gemini:", error);
@@ -164,7 +163,7 @@ export const extractStructuredJobFromFile = async (file: { mimeType: string; dat
             },
         });
         
-        const jsonText = response.text.trim();
+        const jsonText = response.text?.trim() ?? '';
         return JSON.parse(jsonText);
 
     } catch (error) {
@@ -217,7 +216,7 @@ export const rankJobsAgainstCv = async (cvText: string, jobs: Pick<StructuredJob
             }
         });
 
-        const jsonText = response.text.trim();
+        const jsonText = response.text?.trim() ?? '';
         return JSON.parse(jsonText);
 
     } catch (error) {

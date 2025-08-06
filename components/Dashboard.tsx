@@ -1,7 +1,7 @@
 import React from 'react';
 import Card from './Card';
 import { NAV_LINKS } from '../constants';
-import { SparklesIcon, BriefcaseIcon, ShieldCheckIcon, LogoIcon } from './icons'; // Import LogoIcon
+import { SparklesIcon, BriefcaseIcon, LogoIcon } from './icons'; // Import LogoIcon
 
 interface DashboardProps {
   onNavigate: (page: string) => void;

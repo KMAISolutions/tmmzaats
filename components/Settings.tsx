@@ -1,3 +1,4 @@
+"use client";
 
 import React, { useState } from 'react';
 import Card from './Card';
@@ -19,21 +20,10 @@ const Toggle: React.FC<{ label: string; enabled: boolean; onChange: (enabled: bo
 
 
 const Settings: React.FC = () => {
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
     const [notifications, setNotifications] = useState({
         email: true,
         push: false,
     });
-
-    const handleThemeChange = (newTheme: string) => {
-        setTheme(newTheme);
-        localStorage.setItem('theme', newTheme);
-        if (newTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    };
     
     const handleNotificationChange = (key: 'email' | 'push', value: boolean) => {
         setNotifications(prev => ({ ...prev, [key]: value }));
@@ -41,9 +31,9 @@ const Settings: React.FC = () => {
 
     const clearLocalStorage = () => {
         if(window.confirm('Are you sure you want to clear all locally saved data? This will remove your tracked applications and saved CV drafts.')) {
-            const currentTheme = localStorage.getItem('theme') || 'dark';
+            const currentTheme = localStorage.getItem('theme') || 'dark'; // Keep current theme before clearing
             localStorage.clear();
-            localStorage.setItem('theme', currentTheme);
+            localStorage.setItem('theme', currentTheme); // Re-set the theme to ensure dark mode persists
             alert('Local data cleared.');
             window.location.reload();
         }
@@ -57,16 +47,7 @@ const Settings: React.FC = () => {
         <p className="text-zinc-600 dark:text-zinc-400 mt-1">Manage your account and preferences.</p>
       </header>
       <div className="space-y-8 max-w-3xl">
-        <Card>
-            <h2 className="text-xl font-semibold dark:text-white mb-4">Appearance</h2>
-            <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Theme</label>
-                <div className="flex gap-2 rounded-lg bg-zinc-200 dark:bg-zinc-800 p-1">
-                    <button onClick={() => handleThemeChange('light')} className={`w-full p-2 rounded-md text-sm font-semibold ${theme === 'light' ? 'bg-white text-black' : 'text-zinc-600 dark:text-zinc-300'}`}>Light</button>
-                    <button onClick={() => handleThemeChange('dark')} className={`w-full p-2 rounded-md text-sm font-semibold ${theme === 'dark' ? 'bg-white text-black' : 'text-zinc-600 dark:text-zinc-300'}`}>Dark</button>
-                </div>
-            </div>
-        </Card>
+        {/* Appearance section removed */}
 
         <Card>
             <h2 className="text-xl font-semibold dark:text-white mb-4">Notifications</h2>
