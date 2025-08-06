@@ -4,6 +4,7 @@ import { StructuredJob } from '../types';
 import { UploadCloudIcon, FileTextIcon, FileImageIcon, FileCsvIcon, CheckCircleIcon, XCircleIcon, TrashIcon } from './icons';
 import Spinner from './Spinner';
 import Card from './Card';
+import { supabase } from '../lib/supabaseClient'; // Import Supabase client
 
 interface FileStatus {
     id: string;
@@ -12,7 +13,7 @@ interface FileStatus {
     message: string;
 }
 
-const BulkJobUpload: React.FC<{ onUploadComplete: (jobs: StructuredJob[]) => void }> = ({ onUploadComplete }) => {
+const BulkJobUpload: React.FC<{ onUploadComplete: () => void }> = ({ onUploadComplete }) => { // Changed prop type
     const [files, setFiles] = useState<FileStatus[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -24,7 +25,7 @@ const BulkJobUpload: React.FC<{ onUploadComplete: (jobs: StructuredJob[]) => voi
             message: 'Waiting to be processed...'
         }));
         
-        // Prevent duplicates
+        // Prevent duplicates by file name
         setFiles(prev => {
             const existingFileNames = new Set(prev.map(f => f.file.name));
             const uniqueNewFiles = newFileStatuses.filter(f => !existingFileNames.has(f.file.name));
@@ -58,7 +59,7 @@ const BulkJobUpload: React.FC<{ onUploadComplete: (jobs: StructuredJob[]) => voi
     const processFiles = async () => {
         setIsProcessing(true);
         const pendingFiles = files.filter(f => f.status === 'pending');
-        const processedJobs: StructuredJob[] = [];
+        let allSuccessful = true;
         
         for (const fileStatus of pendingFiles) {
             setFiles(prev => prev.map(f => f.id === fileStatus.id ? { ...f, status: 'processing', message: 'Structuring job with AI...' } : f));
@@ -76,7 +77,7 @@ const BulkJobUpload: React.FC<{ onUploadComplete: (jobs: StructuredJob[]) => voi
                     data: base64Data
                 });
 
-                const newJob: StructuredJob = {
+                const newJob: Omit<StructuredJob, 'matchScore'> = { // matchScore is optional for insert
                     id: `job-${Date.now()}-${Math.random()}`,
                     fileName: fileStatus.file.name,
                     fileType: fileStatus.file.type,
@@ -84,15 +85,24 @@ const BulkJobUpload: React.FC<{ onUploadComplete: (jobs: StructuredJob[]) => voi
                     status: 'Processed',
                     ...structuredData,
                 };
-                processedJobs.push(newJob);
-                setFiles(prev => prev.map(f => f.id === fileStatus.id ? { ...f, status: 'success', message: `Successfully structured: ${newJob.title}` } : f));
+                
+                const { error: insertError } = await supabase
+                    .from('structured_jobs')
+                    .insert([newJob]);
+
+                if (insertError) {
+                    throw new Error(`Supabase insert error: ${insertError.message}`);
+                }
+
+                setFiles(prev => prev.map(f => f.id === fileStatus.id ? { ...f, status: 'success', message: `Successfully structured and saved: ${newJob.title}` } : f));
             } catch (error: any) {
+                allSuccessful = false;
                 setFiles(prev => prev.map(f => f.id === fileStatus.id ? { ...f, status: 'error', message: error.message || 'Failed to process.' } : f));
             }
         }
         
-        if (processedJobs.length > 0) {
-            onUploadComplete(processedJobs);
+        if (allSuccessful) {
+            onUploadComplete(); // Notify parent to refresh jobs
         }
         setIsProcessing(false);
     };

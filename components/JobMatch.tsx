@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { StructuredJob } from '../types';
 import Card from './Card';
@@ -6,6 +5,7 @@ import { SearchIcon, BriefcaseIcon, SparklesIcon, AlertCircleIcon, UploadCloudIc
 import MatchScoreCircle from './MatchScoreCircle';
 import Spinner from './Spinner';
 import { rankJobsAgainstCv, extractTextFromFile } from '../services/geminiService';
+import { supabase } from '../lib/supabaseClient'; // Import Supabase client
 
 const JobDetailsModal: React.FC<{ job: StructuredJob, onClose: () => void }> = ({ job, onClose }) => {
     return (
@@ -120,6 +120,7 @@ const JobBoard: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const [viewingJob, setViewingJob] = useState<StructuredJob | null>(null);
+    const [fetchingJobs, setFetchingJobs] = useState(true); // New state for initial job fetch
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -132,15 +133,24 @@ const JobBoard: React.FC = () => {
     const provinces = ['All', 'Eastern Cape', 'Free State', 'Gauteng', 'KwaZulu-Natal', 'Limpopo', 'Mpumalanga', 'North West', 'Northern Cape', 'Western Cape'];
 
     useEffect(() => {
-        try {
-            const savedJobs = localStorage.getItem('structuredJobs');
-            if (savedJobs) {
-                setAllJobs(JSON.parse(savedJobs).sort((a: StructuredJob, b: StructuredJob) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()));
+        const fetchJobs = async () => {
+            setFetchingJobs(true);
+            setError(null);
+            const { data, error: fetchError } = await supabase
+                .from('structured_jobs')
+                .select('*')
+                .order('uploadDate', { ascending: false });
+
+            if (fetchError) {
+                console.error("Error fetching jobs for JobMatch:", fetchError);
+                setError("Failed to load jobs from the database.");
+                setAllJobs([]);
+            } else {
+                setAllJobs(data || []);
             }
-        } catch (e) {
-            console.error("Failed to load jobs", e);
-            setError("Could not load jobs from local storage.");
-        }
+            setFetchingJobs(false);
+        };
+        fetchJobs();
     }, []);
     
     const categories = useMemo(() => ['All', ...new Set(allJobs.map(j => j.category))], [allJobs]);
@@ -170,7 +180,7 @@ const JobBoard: React.FC = () => {
             }
             if (a.matchScore !== undefined) return -1; // a comes first
             if (b.matchScore !== undefined) return 1;  // b comes first
-            return 0; // maintain original date sort
+            return new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime(); // Fallback to date sort
         });
         
         return jobs;
@@ -296,7 +306,7 @@ const JobBoard: React.FC = () => {
                 <div className="mt-4 flex flex-wrap gap-4 items-center">
                     <button
                         onClick={handleFindMatches}
-                        disabled={isLoading || !cvFile}
+                        disabled={isLoading || !cvFile || fetchingJobs}
                         className="bg-white text-black font-bold py-2 px-5 rounded-lg inline-flex items-center gap-2 transition-colors hover:bg-brand-light-gray disabled:bg-zinc-600 disabled:cursor-not-allowed"
                     >
                         {isLoading ? <><Spinner /> Matching...</> : <><SparklesIcon className="h-5 w-5" /> Find Matches</>}
@@ -346,7 +356,14 @@ const JobBoard: React.FC = () => {
             </Card>
 
             <div className="mt-8">
-                {filteredAndSortedJobs.length > 0 ? (
+                {fetchingJobs ? (
+                    <Card>
+                        <div className="text-center py-16">
+                            <Spinner />
+                            <p className="mt-4 text-zinc-400">Loading jobs from database...</p>
+                        </div>
+                    </Card>
+                ) : filteredAndSortedJobs.length > 0 ? (
                     <div className="space-y-6">
                         <p className="text-zinc-400">{filteredAndSortedJobs.length} job(s) found.</p>
                         {filteredAndSortedJobs.map(job => (

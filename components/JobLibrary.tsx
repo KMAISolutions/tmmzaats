@@ -1,8 +1,9 @@
-
 import React, { useState, useMemo } from 'react';
 import { StructuredJob } from '../types';
 import Card from './Card';
 import { SearchIcon, TrashIcon, FileTextIcon } from './icons';
+import { supabase } from '../lib/supabaseClient'; // Import Supabase client
+import Spinner from './Spinner';
 
 const PreviewModal: React.FC<{ job: StructuredJob, onClose: () => void }> = ({ job, onClose }) => {
     return (
@@ -55,7 +56,7 @@ const PreviewModal: React.FC<{ job: StructuredJob, onClose: () => void }> = ({ j
     );
 };
 
-const JobLibrary: React.FC<{ jobs: StructuredJob[], onDelete: (jobIds: string[]) => void }> = ({ jobs, onDelete }) => {
+const JobLibrary: React.FC<{ jobs: StructuredJob[], onDelete: (jobIds: string[]) => Promise<void>, loading: boolean }> = ({ jobs, onDelete, loading }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [previewingJob, setPreviewingJob] = useState<StructuredJob | null>(null);
@@ -93,22 +94,33 @@ const JobLibrary: React.FC<{ jobs: StructuredJob[], onDelete: (jobIds: string[])
         });
     };
     
-    const handleDeleteSelected = () => {
+    const handleDeleteSelected = async () => { // Made async
         if(selectedIds.size === 0) return;
         if(window.confirm(`Are you sure you want to delete ${selectedIds.size} job(s)? This action cannot be undone.`)){
-            onDelete(Array.from(selectedIds));
+            await onDelete(Array.from(selectedIds)); // Await the deletion
             setSelectedIds(new Set());
         }
     };
 
-    const downloadAsCsv = () => {
-        if(jobs.length === 0) return;
+    const downloadAsCsv = async () => { // Made async
+        const { data: allJobsData, error: fetchError } = await supabase.from('structured_jobs').select('*');
+        if (fetchError) {
+            console.error("Error fetching jobs for CSV:", fetchError);
+            alert("Failed to fetch jobs for export.");
+            return;
+        }
+        const jobsToExport = allJobsData || [];
+
+        if(jobsToExport.length === 0) {
+            alert("No jobs to export.");
+            return;
+        }
         const headers = ["jobID", "title", "company", "location", "jobType", "category", "skills", "closingDate", "contactEmail", "contactPhone", "uploadDate", "fileName", "status", "description"];
         const csvRows = [headers.join(',')];
         
         const escapeCsv = (str: string) => `"${str.replace(/"/g, '""')}"`;
 
-        for(const job of jobs) {
+        for(const job of jobsToExport) { // Use jobsToExport
             const values = [
                 job.id,
                 escapeCsv(job.title),
@@ -162,7 +174,12 @@ const JobLibrary: React.FC<{ jobs: StructuredJob[], onDelete: (jobIds: string[])
             </div>
             
             <div className="overflow-x-auto">
-                {filteredJobs.length > 0 ? (
+                {loading ? (
+                    <div className="text-center py-16">
+                        <Spinner />
+                        <p className="mt-4 text-zinc-400">Loading jobs...</p>
+                    </div>
+                ) : filteredJobs.length > 0 ? (
                     <table className="w-full text-sm text-left text-zinc-300">
                         <thead className="text-xs text-zinc-400 uppercase bg-zinc-800">
                             <tr>
@@ -184,7 +201,7 @@ const JobLibrary: React.FC<{ jobs: StructuredJob[], onDelete: (jobIds: string[])
                                     <td className="px-6 py-4"><span className={`px-2 py-1 text-xs font-medium rounded-full ${job.status === 'Processed' ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'}`}>{job.status}</span></td>
                                     <td className="px-6 py-4 text-right">
                                         <button onClick={() => setPreviewingJob(job)} title="Preview Job Details" className="p-1 text-zinc-400 hover:text-white mr-2"><FileTextIcon className="h-5 w-5"/></button>
-                                        <button onClick={() => { if(window.confirm('Are you sure you want to delete this job?')) onDelete([job.id]); }} title="Delete Job" className="p-1 text-zinc-400 hover:text-red-500"><TrashIcon className="h-5 w-5"/></button>
+                                        <button onClick={async () => { if(window.confirm('Are you sure you want to delete this job?')) await onDelete([job.id]); }} title="Delete Job" className="p-1 text-zinc-400 hover:text-red-500"><TrashIcon className="h-5 w-5"/></button>
                                     </td>
                                 </tr>
                             ))}
