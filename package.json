@@ -11,9 +11,11 @@
   "dependencies": {
     "@google/genai": "^1.11.0",
     "@supabase/supabase-js": "^2.53.0",
+    "papaparse": "^5.5.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "recharts": "^3.1.0"
+    "recharts": "^3.1.0",
+    "tesseract.js": "^6.0.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

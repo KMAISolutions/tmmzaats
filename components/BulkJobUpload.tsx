@@ -1,10 +1,11 @@
-import React, { useState, useCallback } from 'react';
-import { extractStructuredJobFromFile } from '../services/geminiService';
+import React, { useState, useCallback, useRef } from 'react';
+import Papa from 'papaparse';
+import Tesseract from 'tesseract.js';
 import { StructuredJob } from '../types';
 import { UploadCloudIcon, FileTextIcon, FileImageIcon, FileCsvIcon, CheckCircleIcon, XCircleIcon, TrashIcon } from './icons';
 import Spinner from './Spinner';
 import Card from './Card';
-import { supabase } from '../src/lib/supabaseClient'; // Corrected import path
+import { supabase } from '../src/lib/supabaseClient';
 
 interface FileStatus {
     id: string;
@@ -12,6 +13,10 @@ interface FileStatus {
     status: 'pending' | 'processing' | 'success' | 'error';
     message: string;
 }
+
+// IMPORTANT: Replace <YOUR_PROJECT_REF> with your actual Supabase project reference
+// You can find this in your Supabase project settings under API -> Project URL
+const SUPABASE_EDGE_FUNCTION_URL = "https://<YOUR_PROJECT_REF>.functions.supabase.co/bulk-job-upload";
 
 const BulkJobUpload: React.FC<{ onUploadComplete: () => void }> = ({ onUploadComplete }) => {
     const [files, setFiles] = useState<FileStatus[]>([]);
@@ -25,7 +30,6 @@ const BulkJobUpload: React.FC<{ onUploadComplete: () => void }> = ({ onUploadCom
             message: 'Waiting to be processed...'
         }));
         
-        // Prevent duplicates by file name
         setFiles(prev => {
             const existingFileNames = new Set(prev.map(f => f.file.name));
             const uniqueNewFiles = newFileStatuses.filter(f => !existingFileNames.has(f.file.name));
@@ -33,9 +37,8 @@ const BulkJobUpload: React.FC<{ onUploadComplete: () => void }> = ({ onUploadCom
         });
     }, []);
 
-    // Manual dropzone logic
     const [isDragging, setIsDragging] = useState<boolean>(false);
-    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragging(true); };
     const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragging(false); };
@@ -56,45 +59,92 @@ const BulkJobUpload: React.FC<{ onUploadComplete: () => void }> = ({ onUploadCom
         }
     };
     
+    const processFileContentForAI = async (file: File): Promise<string[]> => {
+        if (file.type.includes('csv') || file.name.endsWith('.csv')) {
+            return new Promise((resolve, reject) => {
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: (result) => {
+                        const rawJobTexts: string[] = (result.data as any[]).map((row) => {
+                            // Combine relevant columns into a single text string for AI processing
+                            return `Title: ${row.title || row.Title || ''}\nCompany: ${row.company || row.Company || ''}\nLocation: ${row.location || row.Location || ''}\nDescription: ${row.description || row.Description || ''}\nRequirements: ${row.requirements || ''}\nSalary: ${row.salary || ''}`;
+                        }).filter(text => text.trim() !== '');
+                        resolve(rawJobTexts);
+                    },
+                    error: (err) => {
+                        reject(err);
+                    }
+                });
+            });
+        } else if (file.type.startsWith('image/') || file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.type === 'text/plain') {
+            // For images, PDFs, DOCX, TXT, use Tesseract.js for OCR/text extraction
+            const { data: { text } } = await Tesseract.recognize(file, 'eng');
+            return [text]; // Return as an array for the Edge Function
+        } else {
+            throw new Error(`Unsupported file type: ${file.type}. Please upload CSV, image, PDF, DOCX, or TXT files.`);
+        }
+    };
+
     const processFiles = async () => {
         setIsProcessing(true);
         const pendingFiles = files.filter(f => f.status === 'pending');
         let allSuccessful = true;
         
         for (const fileStatus of pendingFiles) {
-            setFiles(prev => prev.map(f => f.id === fileStatus.id ? { ...f, status: 'processing', message: 'Structuring job with AI...' } : f));
+            setFiles(prev => prev.map(f => f.id === fileStatus.id ? { ...f, status: 'processing', message: 'Extracting text and structuring job with AI...' } : f));
             
             try {
-                const reader = new FileReader();
-                const base64Data = await new Promise<string>((resolve, reject) => {
-                    reader.onload = e => resolve((e.target?.result as string).split(',')[1]);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(fileStatus.file);
+                const rawJobTexts = await processFileContentForAI(fileStatus.file);
+
+                if (rawJobTexts.length === 0) {
+                    throw new Error("No readable content found in file.");
+                }
+
+                const res = await fetch(SUPABASE_EDGE_FUNCTION_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ rawJobTexts: rawJobTexts }),
                 });
 
-                const structuredData = await extractStructuredJobFromFile({
-                    mimeType: fileStatus.file.type || 'application/octet-stream',
-                    data: base64Data
-                });
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(`Edge Function error: ${errorData.message || res.statusText}`);
+                }
 
-                const newJob: Omit<StructuredJob, 'matchScore'> = { // matchScore is optional for insert
-                    id: `job-${Date.now()}-${Math.random()}`,
-                    fileName: fileStatus.file.name,
-                    fileType: fileStatus.file.type,
-                    uploadDate: new Date().toISOString(),
+                const { structuredJobs: aiStructuredJobs } = await res.json();
+
+                if (!aiStructuredJobs || aiStructuredJobs.length === 0) {
+                    throw new Error("AI did not return structured job data.");
+                }
+
+                const jobsToInsert = aiStructuredJobs.map((j: StructuredJob) => ({
+                    id: `job-${Date.now()}-${Math.random()}`, // Generate unique ID
+                    file_name: fileStatus.file.name,
+                    file_type: fileStatus.file.type,
+                    upload_date: new Date().toISOString(),
                     status: 'Processed',
-                    ...structuredData,
-                };
+                    title: j.title,
+                    company: j.company,
+                    location: j.location,
+                    job_type: j.jobType,
+                    category: j.category,
+                    skills: j.skills,
+                    description: j.description,
+                    closing_date: j.closingDate || null,
+                    contact_email: j.contactEmail || null,
+                    contact_phone: j.contactPhone || null,
+                }));
                 
                 const { error: insertError } = await supabase
                     .from('structured_jobs')
-                    .insert([newJob]);
+                    .insert(jobsToInsert);
 
                 if (insertError) {
                     throw new Error(`Supabase insert error: ${insertError.message}`);
                 }
 
-                setFiles(prev => prev.map(f => f.id === fileStatus.id ? { ...f, status: 'success', message: `Successfully structured and saved: ${newJob.title}` } : f));
+                setFiles(prev => prev.map(f => f.id === fileStatus.id ? { ...f, status: 'success', message: `Successfully structured and saved ${aiStructuredJobs.length} job(s).` } : f));
             } catch (error: any) {
                 allSuccessful = false;
                 setFiles(prev => prev.map(f => f.id === fileStatus.id ? { ...f, status: 'error', message: error.message || 'Failed to process.' } : f));
