@@ -16,7 +16,7 @@ interface FileStatus {
 
 // IMPORTANT: Replace <YOUR_PROJECT_REF> with your actual Supabase project reference
 // You can find this in your Supabase project settings under API -> Project URL
-const SUPABASE_EDGE_FUNCTION_URL = "https://YOUR_ACTUAL_PROJECT_REF.functions.supabase.co/bulk-job-upload"; // <--- UPDATE THIS LINE
+const SUPABASE_EDGE_FUNCTION_URL = "https://fwpspojxyhnrjhaehkmm.functions.supabase.co/bulk-job-upload"; // <--- UPDATED THIS LINE
 
 const BulkJobUpload: React.FC<{ onUploadComplete: () => void }> = ({ onUploadComplete }) => {
     const [files, setFiles] = useState<FileStatus[]>([]);
