@@ -10,7 +10,7 @@ interface AdminDashboardProps {
     onNavigate: (page: string) => void;
 }
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ /* onNavigate */ }) => {
     const [activeTab, setActiveTab] = useState<'upload' | 'library'>('upload');
     const [jobs, setJobs] = useState<StructuredJob[]>([]);
     const [loadingJobs, setLoadingJobs] = useState(true);

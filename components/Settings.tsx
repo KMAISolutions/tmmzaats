@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Card from './Card';
-import { SettingsIcon, AlertCircleIcon } from './icons';
+import { AlertCircleIcon } from './icons';
 
 const Toggle: React.FC<{ label: string; enabled: boolean; onChange: (enabled: boolean) => void }> = ({ label, enabled, onChange }) => (
     <div className="flex items-center justify-between">

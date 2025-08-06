@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { CvData, WorkExperience, Education, Skill, PersonalDetails } from '../types';
+import { CvData, WorkExperience, Education, PersonalDetails, type Skill } from '../types';
 import Card from './Card';
 import { SaveIcon, TrashIcon, PlusCircleIcon, UserCircleIcon } from './icons';
 
@@ -197,7 +196,7 @@ const RealTimeCvBuilder: React.FC = () => {
     
     const handleAddSkill = () => {
         if(newSkill.trim() !== '') {
-            const skill = { id: Date.now().toString(), name: newSkill.trim() };
+            const skill: Skill = { id: Date.now().toString(), name: newSkill.trim() }; // Explicitly type 'skill'
             setCvData(prev => ({...prev, skills: [...prev.skills, skill]}));
             setNewSkill('');
         }

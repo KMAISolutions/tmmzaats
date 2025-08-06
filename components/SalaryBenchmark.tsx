@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { GoogleGenAI, type GroundingChunk } from "@google/genai";
 import Card from './Card';
-import { DollarSignIcon, SparklesIcon, AlertCircleIcon, SearchIcon } from './icons';
+import { AlertCircleIcon, SearchIcon } from './icons';
 import Spinner from './Spinner';
 
 const SalaryReport: React.FC<{ content: string }> = ({ content }) => {
@@ -143,7 +143,7 @@ const SalaryBenchmark: React.FC = () => {
                 }
             });
 
-            setResult(response.text);
+            setResult(response.text ?? '');
             const groundingMetadata = response.candidates?.[0]?.groundingMetadata;
             if (groundingMetadata?.groundingChunks) {
                 setSources(groundingMetadata.groundingChunks);

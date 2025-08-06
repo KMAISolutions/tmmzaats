@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import Card from './Card';
@@ -145,7 +144,7 @@ const InterviewPrep: React.FC = () => {
                 config: { responseMimeType: "application/json", responseSchema: {type: Type.ARRAY, items: {type: Type.STRING}}}
             });
             
-            setQuestions(JSON.parse(response.text));
+            setQuestions(JSON.parse(response.text ?? '[]'));
             setCurrentQuestionIndex(0);
         } catch (e: any) {
             setError(e.message || "Failed to fetch questions.");
@@ -184,7 +183,7 @@ const InterviewPrep: React.FC = () => {
                 }
             });
             
-            const result: InterviewFeedback = JSON.parse(response.text);
+            const result: InterviewFeedback = JSON.parse(response.text ?? '{}');
             setFeedback(result);
 
             // Save to history

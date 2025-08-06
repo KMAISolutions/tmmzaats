@@ -139,7 +139,7 @@ const CoverLetterGenerator: React.FC = () => {
             }
         });
 
-        setGeneratedLetter(response.text);
+        setGeneratedLetter(response.text ?? '');
 
     } catch (e: any) {
         setError(e.message || "An unknown error occurred.");

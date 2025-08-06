@@ -45,7 +45,7 @@ const Networking: React.FC = () => {
                 contents: prompt,
                 config: { temperature: 0.6 }
             });
-            setGeneratedMessage(response.text);
+            setGeneratedMessage(response.text ?? '');
 
         } catch(e: any) {
             setError(e.message || "An unknown error occurred.");

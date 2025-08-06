@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { AnalysisResult } from '../types';
@@ -40,7 +39,7 @@ const ScoreChart: React.FC<{ score: number }> = ({ score }) => {
             dataKey="value"
             stroke="none"
           >
-            {data.map((entry, index) => (
+            {data.map((_, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
