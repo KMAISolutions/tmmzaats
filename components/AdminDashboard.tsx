@@ -4,7 +4,7 @@ import BulkJobUpload from './BulkJobUpload';
 import JobLibrary from './JobLibrary';
 import Card from './Card';
 import { UploadCloudIcon, NotebookTabsIcon } from './icons';
-import { supabase } from '../lib/supabaseClient'; // Import Supabase client
+import { supabase } from '../src/lib/supabaseClient'; // Corrected import path
 
 interface AdminDashboardProps {
     onNavigate: (page: string) => void;

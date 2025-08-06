@@ -5,7 +5,7 @@ import { SearchIcon, BriefcaseIcon, SparklesIcon, AlertCircleIcon, UploadCloudIc
 import MatchScoreCircle from './MatchScoreCircle';
 import Spinner from './Spinner';
 import { rankJobsAgainstCv, extractTextFromFile } from '../services/geminiService';
-import { supabase } from '../lib/supabaseClient'; // Import Supabase client
+import { supabase } from '../src/lib/supabaseClient'; // Corrected import path
 
 const JobDetailsModal: React.FC<{ job: StructuredJob, onClose: () => void }> = ({ job, onClose }) => {
     return (

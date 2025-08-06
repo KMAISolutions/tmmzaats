@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { StructuredJob } from '../types';
 import Card from './Card';
 import { SearchIcon, TrashIcon, FileTextIcon } from './icons';
-import { supabase } from '../lib/supabaseClient'; // Import Supabase client
+import { supabase } from '../src/lib/supabaseClient'; // Corrected import path
 import Spinner from './Spinner';
 
 const PreviewModal: React.FC<{ job: StructuredJob, onClose: () => void }> = ({ job, onClose }) => {

@@ -4,7 +4,7 @@ import { StructuredJob } from '../types';
 import { UploadCloudIcon, FileTextIcon, FileImageIcon, FileCsvIcon, CheckCircleIcon, XCircleIcon, TrashIcon } from './icons';
 import Spinner from './Spinner';
 import Card from './Card';
-import { supabase } from '../lib/supabaseClient'; // Import Supabase client
+import { supabase } from '../src/lib/supabaseClient'; // Corrected import path
 
 interface FileStatus {
     id: string;
@@ -13,7 +13,7 @@ interface FileStatus {
     message: string;
 }
 
-const BulkJobUpload: React.FC<{ onUploadComplete: () => void }> = ({ onUploadComplete }) => { // Changed prop type
+const BulkJobUpload: React.FC<{ onUploadComplete: () => void }> = ({ onUploadComplete }) => {
     const [files, setFiles] = useState<FileStatus[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
 
