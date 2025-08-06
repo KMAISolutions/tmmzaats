@@ -1,8 +1,7 @@
-
 import React from 'react';
 import Card from './Card';
 import { NAV_LINKS } from '../constants';
-import { SparklesIcon, BriefcaseIcon, ShieldCheckIcon } from './icons';
+import { SparklesIcon, BriefcaseIcon, ShieldCheckIcon, LogoIcon } from './icons'; // Import LogoIcon
 
 interface DashboardProps {
   onNavigate: (page: string) => void;
@@ -16,6 +15,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     <div className="p-8 max-w-7xl mx-auto">
       <header className="mb-12">
         <div className="text-center">
+            {/* Centered Logo */}
+            <div className="flex justify-center mb-4">
+                <LogoIcon className="h-24 w-24 text-brand-charcoal dark:text-white" />
+            </div>
             <h1 className="text-4xl font-bold text-white">Welcome to The Middle Man ZA</h1>
             <p className="text-zinc-400 mt-2 text-lg">Your AI-powered career co-pilot. Let's get you hired.</p>
             <p className="text-zinc-500 mt-4 text-base max-w-3xl mx-auto">
