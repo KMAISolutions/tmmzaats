@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -13,6 +12,7 @@ import Networking from './components/Networking';
 import Settings from './components/Settings';
 import JobMatch from './components/JobMatch';
 import AdminDashboard from './components/AdminDashboard';
+import ComingSoon from './components/ComingSoon'; // Import the new ComingSoon component
 import { MenuIcon, LogoIcon, ShieldCheckIcon, FacebookIcon, WhatsappIcon } from './components/icons';
 import AdminAuthModal from './components/AdminAuthModal';
 
@@ -64,7 +64,7 @@ const App: React.FC = () => {
       case 'Dashboard':
         return <Dashboard onNavigate={handleNavigate} />;
       case 'Job Board':
-        return <JobMatch />;
+        return <ComingSoon featureName="Job Board" />; // Render ComingSoon
       case 'Upload & Analyze CV':
         return <UploadAndAnalyze />;
       case 'Real-Time CV Builder':
@@ -76,7 +76,7 @@ const App: React.FC = () => {
       case 'Salary Benchmark':
         return <SalaryBenchmark />;
       case 'Application Tracker':
-        return <ApplicationTracker />;
+        return <ComingSoon featureName="Application Tracker" />; // Render ComingSoon
       case 'Multilingual CV':
         return <MultilingualCv />;
       case 'Networking':

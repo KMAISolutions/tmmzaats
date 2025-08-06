@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NAV_LINKS } from '../constants';
 import { LogoIcon, XIcon } from './icons';
@@ -27,15 +26,21 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, isOpen, setIs
           {NAV_LINKS.map((link) => (
             <li key={link.name}>
               <button
-                onClick={() => onNavigate(link.name)}
+                onClick={() => !link.comingSoon && onNavigate(link.name)}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors text-left ${
                   activePage === link.name
                     ? 'bg-zinc-100 dark:bg-zinc-800 text-brand-charcoal dark:text-white'
                     : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-brand-charcoal dark:hover:text-white'
-                }`}
+                } ${link.comingSoon ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={link.comingSoon}
               >
                 <link.icon className="h-5 w-5" />
                 <span>{link.name}</span>
+                {link.comingSoon && (
+                  <span className="ml-auto bg-zinc-700 text-zinc-300 text-xs px-2 py-0.5 rounded-full">
+                    Coming Soon
+                  </span>
+                )}
               </button>
             </li>
           ))}
