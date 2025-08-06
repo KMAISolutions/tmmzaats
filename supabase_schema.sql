@@ -8,7 +8,7 @@ CREATE TABLE structured_jobs (
   company TEXT NOT NULL,
   location TEXT NOT NULL,
   job_type TEXT NOT NULL,
-  category TEXT NOT NULL,
+  category TEXT NOT NULL, -- This is the column in question
   skills TEXT[] NOT NULL, -- Array of text
   description TEXT NOT NULL,
   closing_date DATE,
